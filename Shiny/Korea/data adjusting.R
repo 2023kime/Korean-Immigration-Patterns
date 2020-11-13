@@ -82,6 +82,11 @@ Temp_Perm <- full_join(Temp, Perm, by = "Year") %>%
  mutate(Temp_percentage = (Temp_sum/Total_sum)*100) %>%
   mutate(Perm_percentage = (Perm_sum/Total_sum)*100) 
 
+#temp/perm as percentages of total, not out of each other (not add up to 100)
+temp_v_perm <- full_join(Temp, Perm, by = "Year") %>%
+  mutate(Temp_percentage = (Temp_sum/totalsum)*100) %>%
+  mutate(Perm_percentage = (Perm_sum/totalsum)*100) 
+
 # This is total incoming visas from 2000 to 2019. Should calculate the other
 # variables as percentages of visas that year...? for graphing
 Total <- all_reasons %>%
@@ -102,12 +107,14 @@ korea_GDP <- read_excel("korea_data.xls", skip = 3) %>%
 View(korea_GDP)
 
 # This has Job Seeking by M/F/T and GDP values from 2000 to 2020
-joined <- full_join(edited_korea3, korea_GDP, by = "Year")
+joined <- full_join(temp_v_perm, korea_GDP, by = "Year") %>%
+  rename(GDP = value) %>%
+  select(-Indicator)
 View(joined)
-stan_glm(formula = Total ~ value,
+stan_glm(formula = Temp_percentage ~ GDP,
          data = joined,
          refresh = 0) %>%
-  print(digits = 10, deatil = FALSE)
+  print(digits = 4, deatil = FALSE)
 
 #Indicator == "GDP growth (annual %)" |
 
