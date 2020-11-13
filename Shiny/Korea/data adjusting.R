@@ -35,7 +35,7 @@ Academic <- all_reasons %>%
   mutate(Academic_Percentage = (sum/totalsum)*100)
 
 # Religious activities
-Employment <- all_reasons %>%
+Religious <- all_reasons %>%
   filter(Reason == "Religious Activities") %>%
   group_by(Year) %>%
   summarize(sum(Total)) %>%
@@ -111,10 +111,16 @@ joined <- full_join(temp_v_perm, korea_GDP, by = "Year") %>%
   rename(GDP = value) %>%
   select(-Indicator)
 View(joined)
-stan_glm(formula = Temp_percentage ~ GDP,
+stan_glm(formula = Temp_sum ~ GDP,
          data = joined,
          refresh = 0) %>%
   print(digits = 4, deatil = FALSE)
+
+m1 <- lm(Perm_sum ~ GDP + Year,
+         data = joined)
+summary(m1)
+m1$coefficients[1] + m1$coefficients[2] * 28605.73 + m1$coefficients[3] * 2030
+#prediction distribution: make year/gdp growth rates selectable variables
 
 #Indicator == "GDP growth (annual %)" |
 
