@@ -23,6 +23,9 @@ temp_v_perm <- full_join(Temp, Perm, by = "Year") %>%
 kGDP <- korea_GDP %>%
   select(Year, value) %>%
   rename(GDP = value)
+kgrowth <- korea_growth %>%
+  select(Year, value) %>%
+  rename("GDP Growth" = value)
 
 join_pivot <- full_join(korea_GDP, Temp_Perm, by = "Year") %>%
   select(Year, Temp, Perm) %>%
@@ -38,14 +41,59 @@ join_pivot <- full_join(korea_GDP, Temp_Perm, by = "Year") %>%
 
 
  # calculate GDP as a percentage of GDP in 2007, year when Korea became receiver nation
- withGDP <- full_join(join_pivot, kGDP, by = "Year") %>%
-   mutate(GDP = (GDP/21191.25)*100) 
+ withGDP <- full_join(join_pivot, kgrowth, by = "Year") %>%
+   rename(GDP_growth = 'GDP Growth') %>%
+   mutate(GDP_growth = (GDP_growth/5.8)*100) %>%
+   drop_na()
+ #%>%
+ #  mutate("GDP Growth" = ("GDP Growth"/21191.25)*100) 
  ggplot(withGDP, aes(Year, Percentages, color = Visa)) +
-   geom_point() +
-   geom_line(data = withGDP, aes(y = GDP)) +
-   scale_color_manual(values = c("Temp" = "navy", "Perm" = "darkred")) +
+   geom_line() +
+   geom_line(data = withGDP, aes(y = GDP_growth)) +
+   scale_color_manual(values = c("Temp" = "orange", "Perm" = "darkred")) +
    theme_linedraw() +
    labs(x = "Years", y = "Percentages",
         title = "Percentage of Visas for Permanent v. Temporary Stays in Korea",
         subtitle = "2000 to 2020")
  
+ 
+ 
+ 
+ 
+ 
+ 
+EA <- full_join(Employment, Academic, by = "Year")
+EAR <- full_join(EA, Religious, by = "Year") 
+EARF <- full_join(EAR, Family, by = "Year") 
+EARFE <- full_join(EARF, Entertainment, by = "Year") 
+EARFEI <- full_join(EARFE, Investment, by = "Year") %>%
+  rename(Employment = Employment_Percentage,
+         Academic = Academic_Percentage,
+         Religion = Religion_Percentage,
+         Family = Family_Percentage,
+         Entertainment = Entertainment_Percentage,
+        Investment = Investment_Percentage)
+join <- full_join(kgrowth, EARFEI, by = "Year") %>%
+  select(Year, Employment, Academic, Religion, Family, 
+         Entertainment, Investment) %>%
+  pivot_longer(cols = !Year, names_to = "Visa",
+               values_to = "Percentages")
+EARFEIwithGDP <- full_join(join, kgrowth, by = "Year") %>%
+  rename(GDP_growth = 'GDP Growth') %>%
+  mutate(GDP_growth = (GDP_growth)) %>%
+  drop_na()
+ggplot(EARFEIwithGDP, aes(Year, Percentages, color = Visa)) +
+  geom_line() +
+  facet_wrap(~ Visa) +
+  geom_vline(xintercept = 2007, color = "lightgray") +
+  theme_bw() +
+  geom_line(data = EARFEIwithGDP, aes(y = GDP_growth), color = "black", 
+            lty = "dashed") +
+  legend("bottomright", legend = "GDP Growth", col = "black", lty = 2 )
+  labs(x = "Years", y = "Percentages",
+       title = "Reasons why People Visit Korea",
+       subtitle = "Types of Visas Granted from 2000 to 2020")
+
+?geom_line
+?theme
+?geom_vline
