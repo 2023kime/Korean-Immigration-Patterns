@@ -7,7 +7,13 @@
 
 
 # Data on all immigration reasons by M/F/T from 2000 to 2019
-all_reasons <- read_csv("edited_korea2.csv") %>%
+all_reasons <- read_csv("edited_korea2.csv", col_types = cols(X1 = col_double(),
+                                                              Reason = col_character(),
+                                                              year = col_double(),
+                                                              Age = col_character(),
+                                                              Male = col_double(),
+                                                              Female = col_double(),
+                                                              Total = col_double())) %>%
   select(-X1) %>%
   filter(Age == "Total") %>%
   rename("Year" = "year")
@@ -15,6 +21,14 @@ all_reasons <- read_csv("edited_korea2.csv") %>%
 Categories <- all_reasons %>%
   group_by(Reason) %>%
   summarize(sum(Total))
+
+# This is total incoming visas from 2000 to 2019. Should calculate the other
+# variables as percentages of visas that year for graphing
+Total <- all_reasons %>%
+  group_by(Year) %>%
+  summarize(sum(Total)) %>%
+  rename("Sum" = "sum(Total)")
+totalsum <- Total$Sum
 
 
 # This has Job seeking by M/F/T for all ages from 2000 to 2020
@@ -25,6 +39,7 @@ Employment <- all_reasons %>%
   summarize(sum(Total)) %>%
   rename("sum" = `sum(Total)`) %>%
   mutate(Employment_Percentage = (sum/totalsum)*100)
+total_Employment <- Employment$sum
 
 # Academic shows all academic reasons for entering Korea (study, research)
 Academic <- all_reasons %>%
@@ -33,6 +48,7 @@ Academic <- all_reasons %>%
   summarize(sum(Total)) %>%
   rename("sum" = `sum(Total)`) %>%
   mutate(Academic_Percentage = (sum/totalsum)*100)
+total_Academic <- Academic$sum
 
 # Religious activities
 Religious <- all_reasons %>%
@@ -41,6 +57,7 @@ Religious <- all_reasons %>%
   summarize(sum(Total)) %>%
   rename("sum" = `sum(Total)`) %>%
   mutate(Religion_Percentage = (sum/totalsum)*100)
+total_Religious <- Religious$sum
 
 # Family-related reasons
 Family <- all_reasons %>%
@@ -49,6 +66,7 @@ Family <- all_reasons %>%
   summarize(sum(Total)) %>%
   rename("sum" = `sum(Total)`) %>%
   mutate(Family_Percentage = (sum/totalsum)*100)
+total_Family <- Family$sum
 
 # Tourism and Entertainment
 Entertainment <- all_reasons %>%
@@ -57,6 +75,7 @@ Entertainment <- all_reasons %>%
   summarize(sum(Total)) %>%
   rename("sum" = `sum(Total)`) %>%
   mutate(Entertainment_Percentage = (sum/totalsum)*100)
+total_Entertainment <- Entertainment$sum
 
 # Business/foreign investment
 Investment <- all_reasons %>%
@@ -65,6 +84,7 @@ Investment <- all_reasons %>%
   summarize(sum(Total)) %>%
   rename("sum" = `sum(Total)`) %>%
   mutate(Investment_Percentage = (sum/totalsum)*100)
+total_Investment <- Investment$sum
 
 # This is the percentage of visa seekers who sought temporary v. permanent stays
 Temp <- all_reasons %>%
@@ -77,23 +97,18 @@ Perm <- all_reasons %>%
   group_by(Year) %>%
   summarize(sum(Total)) %>%
   rename("Perm_sum" = `sum(Total)`)
+# percentage out of 100
 Temp_Perm <- full_join(Temp, Perm, by = "Year") %>%
   mutate(Total_sum = Temp_sum + Perm_sum) %>%
- mutate(Temp_percentage = (Temp_sum/Total_sum)*100) %>%
-  mutate(Perm_percentage = (Perm_sum/Total_sum)*100) 
-
-#temp/perm as percentages of total, not out of each other (not add up to 100)
+  mutate(Temp_percentage = (Temp_sum/Total_sum)*100) %>%
+  mutate(Perm_percentage = (Perm_sum/Total_sum)*100) %>%
+  rename(Temp = Temp_percentage, Perm = Perm_percentage)
+# calculate percentage of temp/perm from whole instead of each other 
+# (not add to 100, unlike Temp_Perm above)
 temp_v_perm <- full_join(Temp, Perm, by = "Year") %>%
   mutate(Temp_percentage = (Temp_sum/totalsum)*100) %>%
-  mutate(Perm_percentage = (Perm_sum/totalsum)*100) 
-
-# This is total incoming visas from 2000 to 2019. Should calculate the other
-# variables as percentages of visas that year...? for graphing
-Total <- all_reasons %>%
-  group_by(Year) %>%
-  summarize(sum(Total)) %>%
-  rename("Sum" = "sum(Total)")
-totalsum <- Total$Sum
+  mutate(Perm_percentage = (Perm_sum/totalsum)*100) %>%
+  rename(Temp = Temp_percentage, Perm = Perm_percentage)
 
 
 
@@ -104,36 +119,18 @@ korea_GDP <- read_excel("korea_data.xls", skip = 3) %>%
   filter( Indicator == "GDP per capita (constant 2010 US$)" ) %>%
   pivot_longer(cols = 2:22, names_to = "Year") %>%
  mutate(Year = as.double(.$Year))
-View(korea_GDP)
+# GROWTH from the same korea economic data
+korea_growth <- read_excel("korea_data.xls", skip = 3) %>%
+  select("Indicator Name", c("2000":"2020")) %>%
+  rename("Indicator" = "Indicator Name") %>%
+  filter( Indicator == "GDP growth (annual %)") %>%
+  pivot_longer(cols = 2:22, names_to = "Year") %>%
+  mutate(Year = as.double(.$Year))
+# For the graphs file
+kGDP <- korea_GDP %>%
+  select(Year, value) %>%
+  rename(GDP = value)
+kgrowth <- korea_growth %>%
+  select(Year, value) %>%
+  rename("GDP Growth" = value)
 
-# This has Job Seeking by M/F/T and GDP values from 2000 to 2020
-joined <- full_join(temp_v_perm, korea_GDP, by = "Year") %>%
-  rename(GDP = value) %>%
-  select(-Indicator)
-View(joined)
-stan_glm(formula = Temp_sum ~ GDP,
-         data = joined,
-         refresh = 0) %>%
-  print(digits = 4, deatil = FALSE)
-
-m1 <- lm(Perm_sum ~ GDP + Year,
-         data = joined)
-summary(m1)
-m1$coefficients[1] + m1$coefficients[2] * 28605.73 + m1$coefficients[3] * 2030
-#prediction distribution: make year/gdp growth rates selectable variables
-
-#Indicator == "GDP growth (annual %)" |
-
-# Data on Korean GDP since 2000 (until 2020)
-#korea_data <- read_excel("korea_data.xls", skip = 3)
-#korea <- korea_data %>%
-#     select("Indicator Name", c("1960":"2020")) %>%
-#     drop_na() %>%
-#     pivot_longer(cols = 2:47,
-#                 names_to = "Year")
-
-# GDP <- korea[8,]
-#Korea_GDP <- GDP %>%
-#     pivot_longer(cols = 2:47,
-#                 names_to = "Year") %>%
-#  filter(Year >= 2000)
