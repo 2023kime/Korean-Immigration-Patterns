@@ -1,17 +1,21 @@
 library(shiny)
-ui <- navbarPage("Modern Patterns in Korean Immigration",
-  tabPanel("Graphs",
-          fluidPage(
-          titlePanel("Reasons why People Visit Korea"),
+ui <- navbarPage(title = "Modern Patterns in Korean Immigration",
+  tabPanel(title = "Graphs",
+          fluidPage(titlePanel("Reasons why People Visit Korea"),
           sidebarLayout(
-          sidebarPanel(
-          selectInput(
-            "line_plot",
-            "Line Graph",
-            c("Option A" = "a", "Option B" = "b")
-            )),
-         mainPanel(plotOutput("line_plot")))
-  )),
+            sidebarPanel(
+              selectInput(
+              inputId = "reason",
+              label = "Choose the type of visa",
+          choices = c("Academic" = "Academic", 
+                    "Employment" = "Employment", 
+                    "Entertainment" = "Entertainment", 
+                    "Family" = "Family", 
+                    "Investment" = "Investment", 
+                    "Religion" = "Religion", selected = "Academic")
+            ))),
+         mainPanel(plotOutput(ouputId = "line_plot"))),
+  
   tabPanel("Analysis",
          titlePanel("Models of Korean Immigration and Economic Data"),
          p("I have several models.")),
@@ -35,10 +39,27 @@ ui <- navbarPage("Modern Patterns in Korean Immigration",
              business, educational, and investment opportunities that Korea
              can offer. How does growth in GDP affect the different reasons
              that people outside of Korea have for coming to the country?")
-)
+           ))
 
 server <- function(input, output){
-  output$line_plot
+  library(ggplot2)
+  library(tidyverse)
+  data <- reactive({
+    EARFEIwithGDP %>%
+      filter(Visa == input$reason) 
+  })
+  output$line_plot <- renderPlot({ 
+    ggplot(data, aes(Year, Percentages, color = Visa)) +
+      geom_line() +
+      facet_wrap(~ Visa) +
+      geom_vline(xintercept = 2007, color = "darkgray") +
+      geom_line(data = EARFEIwithGDP, aes(y = GDP_growth), color = "black", 
+                lty = "dashed") +
+      theme_bw() +
+      labs(x = "Years", y = "Percentages",
+           title = "Reasons why People Visit Korea",
+           subtitle = "Types of Visas Granted from 2000 to 2020")
+  })
 }
 
 shinyApp(ui = ui, server = server)

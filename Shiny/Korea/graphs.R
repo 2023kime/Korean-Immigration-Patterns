@@ -1,5 +1,6 @@
 #graphs
 
+
 Total <- all_reasons %>%
   group_by(Year) %>%
   summarize(sum(Total)) %>%
@@ -81,6 +82,8 @@ EARFEIwithGDP <- full_join(join, kgrowth, by = "Year") %>%
   rename(GDP_growth = 'GDP Growth') %>%
 #  mutate(GDP_growth = (GDP_growth)) %>%
   drop_na()
+
+
 plot <- ggplot(EARFEIwithGDP, aes(Year, Percentages, color = Visa)) +
   geom_line() +
   facet_wrap(~ Visa) +
