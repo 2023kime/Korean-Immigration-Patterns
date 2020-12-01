@@ -59,7 +59,7 @@ join_pivot <- full_join(korea_GDP, Temp_Perm, by = "Year") %>%
  
  
  
- 
+
  
  
 EA <- full_join(Employment, Academic, by = "Year")

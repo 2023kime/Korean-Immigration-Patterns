@@ -6,6 +6,7 @@ ui <- fluidPage("Hello World",
                 plotOutput(outputId = "hist")
 )
 
+
 server <- function(input, output){
 output$hist <- renderPlot({ 
   title <- "100 random normal values"

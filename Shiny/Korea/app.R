@@ -89,7 +89,8 @@ server <- function(input, output, session) {
 # Run the application 
 shinyApp(ui = ui, server = server)
 
-            
+
+
 # OLD SHINY APP CODE! 
 ui <- navbarPage("Rough Korea Data",
                  tabPanel("Home", 
