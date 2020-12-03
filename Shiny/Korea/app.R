@@ -1,12 +1,3 @@
-#
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-
-
 library(shiny)
 library(tidyverse)
 library(readxl)
@@ -15,32 +6,69 @@ library(ggplot2)
 library(ggforce)
 library(rvest)
 library(rstanarm)
+library(shinythemes)
 
-ui <- navbarPage(title = "Modern Patterns in Korean Immigration",
-                 tabPanel(title = "Graphs",
-                          fluidPage(titlePanel("Reasons why People Visit Korea"),
-                                    sidebarLayout(
-                                      sidebarPanel(
-                                        selectInput(
-                                          radioButtons(inputId = "p", 
-                                                       label = "Choose the type of Visa",
-                                                       choices = c("Academic" = `a`, 
-                                                                   "Employment" = `b`, 
-                                                                   "Entertainment" = `c`, 
-                                                                   "Family" = `d`, 
-                                                                   "Investment" = `e`, 
-                                                                   "Religion" = `f`),
-                                                       selected = "Academic")),
-                                        mainPanel(plotOutput("linePlot")))))),
-                 
+# My first page, "Graphs," looks at the visual line graph representation of
+# "Reasons why People Visit Korea." For the ui, I simply created a panel with
+# radio buttons, so that the viewer can select which type of visa they want 
+# to see displayed on the page. There are a-f options.
+
+# UI is defined for the app. Title is labeled.
+
+ui <- navbarPage(
+  title = "Modern Patterns in Korean Immigration",
+  
+  # The first Tab is labeled Data Visualization.
+  
+                 tabPanel(title = "Data Visualization",
+                 fluidPage(
+                 titlePanel("Reasons why People Visit Korea"),
+                 sidebarLayout(
+                 sidebarPanel(
+                 selectInput(
+                 radioButtons(
+                   inputId = "reason",
+                   label = "Choose the type of Visa",
+                   choices = c("Academic" = `a`,
+                             "Employment" = `b`,
+                             "Entertainment" = `c`,
+                             "Family" = `d`, 
+                             "Investment" = `e`, 
+                             "Religion" = `f`),
+                 selected = "Academic")),
+
+ # The main Panel for this tab.
+ 
+                 mainPanel(plotOutput("linePlot")))))),
+
+# The next tab is called "Analysis," and it shows my model of the ways 
+# different numbers of visas granted each year impacted Korean domestic economic
+# growth.
+
                  tabPanel("Analysis",
-                          titlePanel("Models of Korean Immigration and Economic Data"),
-                          p("I have several models.")),
+                   titlePanel("Models of Korean Immigration and Economic Data"),
+                          p("My first model examines the influence different
+                            types of visas granted since 2000 affect the 
+                            domestic Korean economy. 
+                            
+                            My second model re-classified all visa applications
+                            into two categories: temporary and permanent. The
+                            increasing popularity of permanent visas in the
+                            years since 2000 are tracked in the graph below.
+                            It then predicts the number of permanent visa
+                            applications that will be sought in 2030, based on
+                            economic and visa trends in the existing data.
+                            
+m1 <- lm(Perm_sum ~ GDP + Year,
+         data = joined)
+summary(m1)
+m1$coefficients[1] + m1$coefficients[2] * 28605.73 + m1$coefficients[3] * 2030")),
                  
                  tabPanel("About",
                           titlePanel("About"),
                           h3("Project Background and Motivations"),
-                          p("Hello! For much of the twentieth century, the Korean peninsula 
+                          p("Hello! For much of the twentieth century, the 
+                          Korean peninsula 
            experienced political, social, and economic ravagement: the 1900s 
            began with colonialism under Japan, the division of the country in 
            two after World War II, a devastatingly bloody Korean War, and 
@@ -56,8 +84,14 @@ ui <- navbarPage(title = "Modern Patterns in Korean Immigration",
              measured through visas of entry granted each year, interacted and 
              predicted the changes in Korean 'hard' power, or economic status. 
              My data indicates patterns of foreign interest in traveling to 
-             Korea from 2000 onwards. 
-             A personal note--I myself am a second-generation Korean-American
+             Korea from 2000 onwards."),
+            h3("About Me"),
+            p("My name is Esther Kim, and I am a sophomore at Harvard 
+            studying Government and East Asian Studies.
+            My contact is eekim@college.harvard.edu. 
+            My Github account is https://github.com/2023kime.
+            
+            A personal note--I myself am a second-generation Korean-American
              who is increasingly influenced by and curious about Korean culture.
              In stark contrast to my parents who left the country, I would like 
              to 'return' to Korea, literally and academically. Why others all 
@@ -65,12 +99,17 @@ ui <- navbarPage(title = "Modern Patterns in Korean Immigration",
              is an interesting question to me, and this information can be quite 
              useful for crafting Korean policy towards foreigners going forwards 
              as well as better understanding Korea's extraordinary modern 
-             history.")
+              history.")
                  ))
 
+# In the server, I dumped all of my data wrangling from the raw csv, the 
+# summarizing and joining of different information about each visa type,
+# and the way I combined this data with Korea's GDP data. I then plotted 
+# this information as a reactive render plot of the input (type of visa selected
+# by the radio button options).
+
 server <- function(input, output){
-  library(ggplot2)
-  library(tidyverse)
+  library(gganimate)
   
   # Data on all immigration reasons by M/F/T from 2000 to 2019
   all_reasons <- read_csv("edited_korea2.csv", col_types = cols(X1 = col_double(),
@@ -229,7 +268,7 @@ server <- function(input, output){
     if(input$p == `d`){data <- EARFEIwithGDP %>% filter(Visa == "Family")}
     if(input$p == `e`){data <- EARFEIwithGDP %>% filter(Visa == "Investment")}
     if(input$p == `f`){data <- EARFEIwithGDP %>% filter(Visa == "Religion")}
-    ggplot(data, aes(Year, Percentages, color = Visa)) +
+   plot <- ggplot(data, aes(Year, Percentages, color = Visa)) +
       geom_line() +
       #     facet_wrap(~ Visa) +
       geom_vline(xintercept = 2007, color = "darkgray") +
@@ -239,8 +278,11 @@ server <- function(input, output){
       labs(x = "Years", y = "Percentages",
            title = "Reasons why People Visit Korea",
            subtitle = "Types of Visas Granted from 2000 to 2020")
+plot + geom_point(aes(group = seq_along(Year))) +
+      transition_reveal(Year)
   })
 } 
+
 shinyApp(ui = ui, server = server)
 
 
