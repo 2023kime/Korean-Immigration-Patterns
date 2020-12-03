@@ -8,19 +8,14 @@ library(rvest)
 library(rstanarm)
 library(shinythemes)
 
-# My first page, "Graphs," looks at the visual line graph representation of
-# "Reasons why People Visit Korea." For the ui, I simply created a panel with
-# radio buttons, so that the viewer can select which type of visa they want 
-# to see displayed on the page. There are a-f options.
-
 # UI is defined for the app. Title is labeled.
 
 ui <- navbarPage(
   title = "Modern Patterns in Korean Immigration",
   
-  # The first Tab is labeled Data Visualization.
+  # The first Tab shows my faceted graphs for different visa types.
   
-                 tabPanel(title = "Data Visualization",
+                 tabPanel(title = "Types of Visas",
                  fluidPage(
                  titlePanel("Reasons why People Visit Korea"),
                  sidebarLayout(
@@ -35,17 +30,22 @@ ui <- navbarPage(
                              "Family" = `d`, 
                              "Investment" = `e`, 
                              "Religion" = `f`),
-                 selected = "Academic")),
-
+                 selected = "Academic"), 
+                 mainPanel(plotOutput("lineplot"))))))),
  # The main Panel for this tab.
  
-                 mainPanel(plotOutput("linePlot")))))),
+                 
 
-# The next tab is called "Analysis," and it shows my model of the ways 
-# different numbers of visas granted each year impacted Korean domestic economic
-# growth.
 
-                 tabPanel("Analysis",
+              tabPanel("Visa Permanency",
+                       fluidPage(),
+mainPanel(plotOutput("secondlineplot"))),
+
+ # The next tab shows my model of the ways different numbers of visas granted 
+ # each year impacted Korean domestic economic growth. The second model is
+ # a predictor of permanent v. temporary visas.
+ 
+                 tabPanel("Model",
                    titlePanel("Models of Korean Immigration and Economic Data"),
                           p("My first model examines the influence different
                             types of visas granted since 2000 affect the 
@@ -67,7 +67,7 @@ m1$coefficients[1] + m1$coefficients[2] * 28605.73 + m1$coefficients[3] * 2030")
                  tabPanel("About",
                           titlePanel("About"),
                           h3("Project Background and Motivations"),
-                          p("Hello! For much of the twentieth century, the 
+                          p("For much of the twentieth century, the 
                           Korean peninsula 
            experienced political, social, and economic ravagement: the 1900s 
            began with colonialism under Japan, the division of the country in 
@@ -89,9 +89,9 @@ m1$coefficients[1] + m1$coefficients[2] * 28605.73 + m1$coefficients[3] * 2030")
             p("My name is Esther Kim, and I am a sophomore at Harvard 
             studying Government and East Asian Studies.
             My contact is eekim@college.harvard.edu. 
-            My Github account is https://github.com/2023kime.
+            My Github account is https://github.com/2023kime."),
             
-            A personal note--I myself am a second-generation Korean-American
+            p("A personal note--I myself am a second-generation Korean-American
              who is increasingly influenced by and curious about Korean culture.
              In stark contrast to my parents who left the country, I would like 
              to 'return' to Korea, literally and academically. Why others all 
@@ -261,7 +261,7 @@ server <- function(input, output){
   #   EARFEIwithGDP %>%
   #     filter(Visa == input$reason)})
   
-  output$linePlot <- renderPlot({ 
+  output$lineplot <- renderPlot({ 
     if(input$p == `a`){data <- EARFEIwithGDP %>% filter(Visa == "Academic")}
     if(input$p == `b`){data <- EARFEIwithGDP %>% filter(Visa == "Employment")}
     if(input$p == `c`){data <- EARFEIwithGDP %>% filter(Visa == "Entertainment")}
@@ -280,6 +280,27 @@ server <- function(input, output){
            subtitle = "Types of Visas Granted from 2000 to 2020")
 plot + geom_point(aes(group = seq_along(Year))) +
       transition_reveal(Year)
+
+withGDP <- full_join(join_pivot, kgrowth, by = "Year") %>%
+  rename(GDP_growth = 'GDP Growth') %>%
+  mutate(GDP_growth = (GDP_growth/5.8)*100) %>%
+  drop_na()
+join_pivot <- full_join(korea_GDP, Temp_Perm, by = "Year") %>%
+  select(Year, Temp, Perm) %>%
+  pivot_longer(cols = !Year, names_to = "Visa",
+               values_to = "Percentages")
+
+ouput$secondlineplot <- ggplot(withGDP, aes(Year, Percentages, color = Visa)) +
+  geom_line() +
+  geom_line(data = withGDP, 
+            aes(y = GDP_growth), 
+            color = "black", 
+            lty = "dashed") +
+  scale_color_manual(values = c("Temp" = "orange", "Perm" = "blue")) +
+  theme_linedraw() +
+  labs(x = "Years", y = "Percentages",
+       title = "Percentage of Visas for Permanent v. Temporary Stays in Korea",
+       subtitle = "2000 to 2020")
   })
 } 
 
