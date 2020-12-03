@@ -5,6 +5,21 @@
 #In 2007 the UN declared South Korea an official receiving country. 
 #The number of foreigners in South Korea grew from 390,000 in 1997 to 1 million in 2007. 
 
+d <- read_csv("https://projects.fivethirtyeight.com/2020-general-data/presidential_ev_probabilities_2020.csv",
+              col_types = cols(cycle = col_double(),
+                               branch = col_character(),
+                               model = col_character(),
+                               modeldate = col_character(),
+                               candidate_inc = col_character(),
+                               candidate_chal = col_character(),
+                               candidate_3rd = col_logical(),
+                               evprob_inc = col_double(),
+                               evprob_chal = col_double(),
+                               evprob_3rd = col_logical(),
+                               total_ev = col_double(),
+                               timestamp = col_character(),
+                               simulations = col_double())) %>%
+  select(total_ev, evprob_inc, evprob_chal)
 
 # Data on all immigration reasons by M/F/T from 2000 to 2019
 all_reasons <- read_csv("edited_korea2.csv", col_types = cols(X1 = col_double(),

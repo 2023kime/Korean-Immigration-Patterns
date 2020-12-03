@@ -5,15 +5,17 @@ ui <- navbarPage(title = "Modern Patterns in Korean Immigration",
           sidebarLayout(
             sidebarPanel(
               selectInput(
-                radioButtons("p", "Choose the type of visa",
-                list("Academic" = `a`, 
+                radioButtons(inputId = "p", 
+                             label = "Choose the type of Visa",
+                choices = c("Academic" = `a`, 
                     "Employment" = `b`, 
                     "Entertainment" = `c`, 
                     "Family" = `d`, 
                     "Investment" = `e`, 
-                    "Religion" = `f`))),
-         mainPanel(plotOutput("linePlot"))))),
-  
+                    "Religion" = `f`),
+                selected = "Academic")),
+         mainPanel(plotOutput("linePlot")))))),
+
   tabPanel("Analysis",
          titlePanel("Models of Korean Immigration and Economic Data"),
          p("I have several models.")),
@@ -47,7 +49,7 @@ ui <- navbarPage(title = "Modern Patterns in Korean Immigration",
              useful for crafting Korean policy towards foreigners going forwards 
              as well as better understanding Korea's extraordinary modern 
              history.")
-           )), 
+           ))
 
 server <- function(input, output){
   library(ggplot2)
@@ -201,8 +203,8 @@ server <- function(input, output){
     drop_na()
  # data <- reactive({
  #   EARFEIwithGDP %>%
- #     filter(Visa == input$reason) 
- # })
+ #     filter(Visa == input$reason)})
+  
   output$linePlot <- renderPlot({ 
  if(input$p == `a`){data <- EARFEIwithGDP %>% filter(Visa == "Academic")}
  if(input$p == `b`){data <- EARFEIwithGDP %>% filter(Visa == "Employment")}
