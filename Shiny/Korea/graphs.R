@@ -3,7 +3,7 @@
 
 Total <- all_reasons %>%
   group_by(Year) %>%
-  summarize(sum(Total)) %>%
+  summarize(sum(Total), .groups = "drop") %>%
   rename("Sum" = "sum(Total)")
 totalsum <- Total$Sum
 
@@ -40,7 +40,14 @@ join_pivot <- full_join(korea_GDP, Temp_Perm, by = "Year") %>%
         title = "Percentage of Visas for Permanent v. Temporary Stays in Korea",
         subtitle = "2000 to 2020")
 
-
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+# GRAPH 2
  # calculate GDP as a percentage of GDP in 2007, year when Korea became receiver nation
  withGDP <- full_join(join_pivot, kgrowth, by = "Year") %>%
    rename(GDP_growth = 'GDP Growth') %>%

@@ -20,13 +20,13 @@ all_reasons <- read_csv("edited_korea2.csv", col_types = cols(X1 = col_double(),
 
 Categories <- all_reasons %>%
   group_by(Reason) %>%
-  summarize(sum(Total))
+  summarize(sum(Total), .groups = "drop")
 
 # This is total incoming visas from 2000 to 2019. Should calculate the other
 # variables as percentages of visas that year for graphing
 Total <- all_reasons %>%
   group_by(Year) %>%
-  summarize(sum(Total)) %>%
+  summarize(sum(Total), .groups = "drop") %>%
   rename("Sum" = "sum(Total)")
 totalsum <- Total$Sum
 
@@ -36,7 +36,7 @@ totalsum <- Total$Sum
 Employment <- all_reasons %>%
   filter(Reason == "Job Seeking" | Reason == "Short-term Employment" | Reason == "Unskilled Employment" | Reason == "General Trainees") %>%
   group_by(Year) %>%
-  summarize(sum(Total)) %>%
+  summarize(sum(Total), .groups = "drop") %>%
   rename("sum" = `sum(Total)`) %>%
   mutate(Employment_Percentage = (sum/totalsum)*100)
 total_Employment <- Employment$sum
@@ -45,7 +45,7 @@ total_Employment <- Employment$sum
 Academic <- all_reasons %>%
   filter(Reason == "study" | Reason == "Research")  %>%
   group_by(Year) %>%
-  summarize(sum(Total)) %>%
+  summarize(sum(Total), .groups = "drop") %>%
   rename("sum" = `sum(Total)`) %>%
   mutate(Academic_Percentage = (sum/totalsum)*100)
 total_Academic <- Academic$sum
@@ -54,7 +54,7 @@ total_Academic <- Academic$sum
 Religious <- all_reasons %>%
   filter(Reason == "Religious Activities") %>%
   group_by(Year) %>%
-  summarize(sum(Total)) %>%
+  summarize(sum(Total), .groups = "drop") %>%
   rename("sum" = `sum(Total)`) %>%
   mutate(Religion_Percentage = (sum/totalsum)*100)
 total_Religious <- Religious$sum
@@ -63,7 +63,7 @@ total_Religious <- Religious$sum
 Family <- all_reasons %>%
   filter(Reason == "Visiting and Joining Family" | Reason == "Marriage Immigration") %>%
   group_by(Year) %>%
-  summarize(sum(Total)) %>%
+  summarize(sum(Total), .groups = "drop") %>%
   rename("sum" = `sum(Total)`) %>%
   mutate(Family_Percentage = (sum/totalsum)*100)
 total_Family <- Family$sum
@@ -72,7 +72,7 @@ total_Family <- Family$sum
 Entertainment <- all_reasons %>%
   filter(Reason == "Sightseeing Pass" | Reason == "Art and Entertainment") %>%
   group_by(Year) %>%
-  summarize(sum(Total)) %>%
+  summarize(sum(Total), .groups = "drop") %>%
   rename("sum" = `sum(Total)`) %>%
   mutate(Entertainment_Percentage = (sum/totalsum)*100)
 total_Entertainment <- Entertainment$sum
@@ -81,7 +81,7 @@ total_Entertainment <- Entertainment$sum
 Investment <- all_reasons %>%
   filter(Reason == "Investors" | Reason == "Short-term Business" | Reason == "Trade and Business") %>%
   group_by(Year) %>%
-  summarize(sum(Total)) %>%
+  summarize(sum(Total), .groups = "drop") %>%
   rename("sum" = `sum(Total)`) %>%
   mutate(Investment_Percentage = (sum/totalsum)*100)
 total_Investment <- Investment$sum
@@ -90,12 +90,12 @@ total_Investment <- Investment$sum
 Temp <- all_reasons %>%
   filter(Reason == "Short-term Visitors") %>%
   group_by(Year) %>%
-  summarize(sum(Total)) %>%
+  summarize(sum(Total), .groups = "drop") %>%
   rename("Temp_sum" = `sum(Total)`)
 Perm <- all_reasons %>%
   filter(Reason == "Permanent Residence") %>%
   group_by(Year) %>%
-  summarize(sum(Total)) %>%
+  summarize(sum(Total), .groups = "drop") %>%
   rename("Perm_sum" = `sum(Total)`)
 # percentage out of 100
 Temp_Perm <- full_join(Temp, Perm, by = "Year") %>%
@@ -132,5 +132,6 @@ kGDP <- korea_GDP %>%
   rename(GDP = value)
 kgrowth <- korea_growth %>%
   select(Year, value) %>%
-  rename("GDP Growth" = value)
+  rename("GDP Growth" = value) %>%
+  filter(Year != 2020)
 

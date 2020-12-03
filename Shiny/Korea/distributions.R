@@ -21,7 +21,7 @@ kgrowth$Investment <- Investment$sum
 kgrowth$Sum <- totalsum
 View(kgrowth)
 
-stan_glm(formula = Sum ~ Year + `GDP Growth` + Employment,
+stan_glm(formula = Sum ~ Year + `GDP Growth` + Entertainment,
          data = kgrowth,
          refresh = 0) %>%
   print(digits = 10, detail = FALSE)
