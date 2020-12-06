@@ -91,6 +91,7 @@ EARFEIwithGDP <- full_join(join, kgrowth, by = "Year") %>%
   drop_na()
 
 
+library(gganimate)
 plot <- ggplot(EARFEIwithGDP, aes(Year, Percentages, color = Visa)) +
   geom_line() +
   facet_wrap(~ Visa) +
@@ -102,9 +103,10 @@ plot <- ggplot(EARFEIwithGDP, aes(Year, Percentages, color = Visa)) +
        title = "Reasons why People Visit Korea",
        subtitle = "Types of Visas Granted from 2000 to 2020")
 # just figure out how to add on to legend to indicate gdp growth!
-
-install.packages("gganimate")
-library(gganimate)
 animated <- plot +  
   geom_point(aes(group = seq_along(Year))) +
   transition_reveal(Year)
+anim_save("animated.gif", animated)
+
+# save animated as a gif, import into the app.R as an object, assign to output
+# for first tab using anim_save

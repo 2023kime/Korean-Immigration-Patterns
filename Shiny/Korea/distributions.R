@@ -19,7 +19,7 @@ kgrowth$Religion <- Religion$sum
 kgrowth$Family <- Family$sum
 kgrowth$Investment <- Investment$sum
 kgrowth$Sum <- totalsum
-View(kgrowth)
+finaldata <- kgrowth
 
 stan_glm(formula = Sum ~ Year + `GDP Growth` + Entertainment,
          data = kgrowth,
@@ -41,10 +41,32 @@ joined <- full_join(temp_v_perm, korea_GDP, by = "Year") %>%
   rename(GDP = value) %>%
   select(-Indicator)
 
-stan_glm(formula = Temp_sum ~ GDP - 1,
+fit <- stan_glm(formula = Temp_sum ~ GDP - 1,
          data = joined,
          refresh = 0) %>%
   print(digits = 4, deatil = FALSE)
+plot(fit, "hist", pars = "GDP")
+
+fit2 <- stan_glm(formula = GDP ~ Temp_sum + Perm_sum -1,
+                 data = joined,
+                 refresh = 0) %>%
+  print(digits = 4, deatil = FALSE)
+plot(fit2, "hist", pars = c("Temp_sum", "Perm_sum"), binwidth = .05)
+
+fit3 <- stan_glm(formula = `GDP Growth` ~ Entertainment + Employment + Academic + 
+                   Religion + Family + Investment - 1,
+                 data = finaldata,
+                 refresh = 0) %>%
+  print(digits = 4, deatil = FALSE)
+
+plot(fit3, "hist", pars = c("Entertainment", "Employment", "Academic", "Religion",
+                            "Family", "Investment"), binwidth = .0001)
+m3 <- lm(`GDP Growth` ~ Entertainment + Employment + Academic + 
+           Religion + Family + Investment,
+         data = finaldata)
+summary(m3) 
+# make this model into table
+
 
 m1 <- lm(Perm_sum ~ GDP + Year,
          data = joined)

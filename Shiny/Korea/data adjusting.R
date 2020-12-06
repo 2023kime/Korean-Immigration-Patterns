@@ -150,3 +150,26 @@ kgrowth <- korea_growth %>%
   rename("GDP Growth" = value) %>%
   filter(Year != 2020)
 
+EA <- full_join(Employment, Academic, by = "Year")
+EAR <- full_join(EA, Religion, by = "Year") 
+EARF <- full_join(EAR, Family, by = "Year") 
+EARFE <- full_join(EARF, Entertainment, by = "Year") 
+EARFEI <- full_join(EARFE, Investment, by = "Year") %>%
+  rename(Employment = Employment_Percentage,
+         Academic = Academic_Percentage,
+         Religion = Religion_Percentage,
+         Family = Family_Percentage,
+         Entertainment = Entertainment_Percentage,
+         Investment = Investment_Percentage)
+join <- full_join(kgrowth, EARFEI, by = "Year") %>%
+  select(Year, Employment, Academic, Religion, Family, 
+         Entertainment, Investment) %>%
+  pivot_longer(cols = !Year, names_to = "Visa",
+               values_to = "Percentages")
+EARFEIwithGDP <- full_join(join, kgrowth, by = "Year") %>%
+  rename(GDP_growth = 'GDP Growth') %>%
+  #  mutate(GDP_growth = (GDP_growth)) %>%
+  drop_na()
+setwd("~/Desktop/Projects/Final-Project/Shiny/Korea")
+write.csv(EARFEIwithGDP, "data/EARFEIwithGDP.csv")
+
