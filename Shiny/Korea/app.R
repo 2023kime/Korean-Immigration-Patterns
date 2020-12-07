@@ -17,6 +17,7 @@ ui <- navbarPage("Modern Patterns in Korean Immigration",
                  tabPanel("Visa Types",
                           fluidPage(theme = shinytheme("journal"),
                           titlePanel("Korean Growth and Travel Visas"),
+                          h4("Historical Context"),
 p("For much of the twentieth century, the 
                           Korean peninsula 
            experienced political, social, and economic ravagement: the 1900s 
@@ -30,12 +31,18 @@ p("For much of the twentieth century, the
              Han River'; at the same time, the world reeled from 'Hallyu,' or 
              the Korean Wave phenomenon, in which Korean cultural products 
              (from music to food to media) skyrocketed to global popularity. 
-             In this project, I take a look at how Korean soft power,
-             measured through visas of entry granted each year, interacted and 
-             predicted the changes in Korean 'hard' power, or economic status. 
-             My data indicates patterns of foreign interest in traveling to 
-             Korea from 2000 onwards."),
+             Due to Hallyu as well as intensive government-backed investment
+             in export industries, Korea has gained more attention from foreign
+             countries."),
+h4("Tracking Patterns through Visas"),
+p("In this project, I take a look at how fluctuations in the Korean economy,
+based on both domestic reforms and global financial crises, influenced
+the appeal of visiting Korea for those outside the country. The visas of entry
+into Korea granted each year since 2000 are separated into six popular 
+categories: Academic, Employment, Entertainment, Family, Investment, and 
+Religious-based reasons for traveling to Korea."),
 mainPanel(plotOutput("plot1")),
+h3("Important Dates"),
           h4("1997"),
           p("The IMF crisis hit Korean growth heavily in 1997, and outstanding
           national loans were felt heavily as Korea entered the 21st century."),
