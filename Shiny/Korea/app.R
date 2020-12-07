@@ -8,39 +8,49 @@ library(rvest)
 library(rstanarm)
 library(shinythemes)
 library(gganimate)
-
+ 
 # UI is defined for the app. Title is labeled.
+
 EARFEIwithGDP <- read_csv("data/EARFEIwithGDP.csv")
 
-ui <- navbarPage(
-  fluidPage(titlePanel(title = "Modern Patterns in Korean Immigration"),
-  
-  # The first Tab shows my faceted graphs for different visa types.
-  
-                 # tabPanel(title = "Types of Visas",
-                 # fluidPage(
-                 # titlePanel("Reasons why People Visit Korea"),
-                 # sidebarLayout(
-                 # sidebarPanel(
-                 # selectInput(
-                 # radioButtons(
-                 #   inputId = "reason",
-                 #   label = "Choose the type of Visa",
-                 #   choices = c("Academic" = `a`,
-                 #             "Employment" = `b`,
-                 #             "Entertainment" = `c`,
-                 #             "Family" = `d`, 
-                 #             "Investment" = `e`, 
-                 #             "Religion" = `f`),
-                 # selected = "Academic"), 
-                 # mainPanel(plotOutput("lineplot"))))))),
- # The main Panel for this tab.
-imageOutput("plot1")),
-
+ui <- navbarPage("Modern Patterns in Korean Immigration",
+                 tabPanel("Visa Types",
+                          fluidPage(theme = shinytheme("journal"),
+                          titlePanel("Reasons for Visiting Korea"),
+p("For much of the twentieth century, the 
+                          Korean peninsula 
+           experienced political, social, and economic ravagement: the 1900s 
+           began with colonialism under Japan, the division of the country in 
+           two after World War II, a devastatingly bloody Korean War, and 
+           temporary occupation by foreign powers. As a result, Korea was one of
+           the poorest countries in Asia, and many Koreans immigrated out of the
+           country to pursue better lives for themselves and their families. 
+           However, at the close of the century, Korea became renown for its 
+           explosive economic recovery and growth, dubbed the 'miracle on the 
+             Han River'; at the same time, the world reeled from 'Hallyu,' or 
+             the Korean Wave phenomenon, in which Korean cultural products 
+             (from music to food to media) skyrocketed to global popularity. 
+             In this project, I take a look at how Korean soft power,
+             measured through visas of entry granted each year, interacted and 
+             predicted the changes in Korean 'hard' power, or economic status. 
+             My data indicates patterns of foreign interest in traveling to 
+             Korea from 2000 onwards."),
+mainPanel(plotOutput("plot1"),
+          ))),
 
               tabPanel("Visa Permanency",
-                       fluidPage(),
-                       mainPanel(plotOutput("plot2"))),
+                       fluidPage(
+                         titlePanel("Length of Stay in Korea"),
+                       mainPanel(h4("Permanent v. Temporary Visas"),
+                                 p("The attractiveness of visiting Korea for 
+                                   a short time v. deciding to settle in Korea
+                                   to build a livelihood must be influenced
+                                   by changed in Korea's wealth and living 
+                                   standards. How did these broad 
+                                   classifications of visas change as Korean
+                                   GDP changed over time?"),
+                         plotOutput("plot2")),
+                       )),
 
  # The next tab shows my model of the ways different numbers of visas granted 
  # each year impacted Korean domestic economic growth. The second model is
@@ -68,39 +78,20 @@ m1$coefficients[1] + m1$coefficients[2] * 28605.73 + m1$coefficients[3] * 2030")
                  tabPanel("About",
                           titlePanel("About"),
                           h3("Project Background and Motivations"),
-                          p("For much of the twentieth century, the 
-                          Korean peninsula 
-           experienced political, social, and economic ravagement: the 1900s 
-           began with colonialism under Japan, the division of the country in 
-           two after World War II, a devastatingly bloody Korean War, and 
-           temporary occupation by foreign powers. As a result, Korea was one of
-           the poorest countries in Asia, and many Koreans immigrated out of the
-           country to pursue better lives for themselves and their families. 
-           However, at the close of the century, Korea became renown for its 
-           explosive economic recovery and growth, dubbed the 'miracle on the 
-             Han River'; at the same time, the world reeled from 'Hallyu,' or 
-             the Korean Wave phenomenon, in which Korean cultural products 
-             (from music to food to media) skyrocketed to global popularity. 
-             In this project, I take a look at how Korean soft power,
-             measured through visas of entry granted each year, interacted and 
-             predicted the changes in Korean 'hard' power, or economic status. 
-             My data indicates patterns of foreign interest in traveling to 
-             Korea from 2000 onwards."),
+            p("I myself am a second-generation Korean-American who is 
+              increasingly influenced by and curious about Korean culture. 
+              In stark contrast to my parents who left the country, I would like
+              to 'return' to Korea, literally and academically. Why others all 
+              across the world are also enchanted by the opportunities of Korea
+              is an interesting question to me, and this information can be 
+              quite useful for crafting Korean policy towards foreigners going 
+              forwards as well as better understanding Korea's extraordinary 
+              modern history."),
             h3("About Me"),
             p("My name is Esther Kim, and I am a sophomore at Harvard 
             studying Government and East Asian Studies.
             My contact is eekim@college.harvard.edu. 
-            My Github account is https://github.com/2023kime."),
-            
-            p("A personal note--I myself am a second-generation Korean-American
-             who is increasingly influenced by and curious about Korean culture.
-             In stark contrast to my parents who left the country, I would like 
-             to 'return' to Korea, literally and academically. Why others all 
-             across the world are also enchanted by the opportunities of Korea 
-             is an interesting question to me, and this information can be quite 
-             useful for crafting Korean policy towards foreigners going forwards 
-             as well as better understanding Korea's extraordinary modern 
-              history.")
+            My Github account is https://github.com/2023kime.")
                  ))
 
 # In the server, I dumped all of my data wrangling from the raw csv, the 
@@ -110,10 +101,15 @@ m1$coefficients[1] + m1$coefficients[2] * 28605.73 + m1$coefficients[3] * 2030")
 # by the radio button options).
 
 server <- function(input, output){
-outfile <- tempfile(fileext='.gif')
-output$plot1  <- outfile
+
+output$plot1  <- renderImage({
+  filename <- file.path('animated.gif')
+  list(src = filename,
+       contentType = 'image/gif',
+       alt = 'Animated')
+}, deleteFile = FALSE)
   
-output$plot2 <- 
+#output$plot2 <- 
   
   # ggplot(EARFEIwithGDP, aes(Year, Percentages, color = Visa)) +
   #   geom_line() +
@@ -146,8 +142,8 @@ output$plot2 <-
 #   labs(x = "Years", y = "Percentages",
 #        title = "Percentage of Visas for Permanent v. Temporary Stays in Korea",
 #        subtitle = "2000 to 2020")
- # })
-} 
+# })
+}
 
 shinyApp(ui = ui, server = server)
 
