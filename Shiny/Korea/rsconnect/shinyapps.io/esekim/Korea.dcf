@@ -5,8 +5,8 @@ account: esekim
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 2975454
-bundleId: 3936342
+bundleId: 3956569
 url: https://eekim.shinyapps.io/Korea/
-when: 1606968027.509
+when: 1607369036.58474
 asMultiple: FALSE
 asStatic: FALSE

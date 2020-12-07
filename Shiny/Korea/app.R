@@ -16,7 +16,7 @@ EARFEIwithGDP <- read_csv("data/EARFEIwithGDP.csv")
 ui <- navbarPage("Modern Patterns in Korean Immigration",
                  tabPanel("Visa Types",
                           fluidPage(theme = shinytheme("journal"),
-                          titlePanel("Reasons for Visiting Korea"),
+                          titlePanel("Korean Growth and Travel Visas"),
 p("For much of the twentieth century, the 
                           Korean peninsula 
            experienced political, social, and economic ravagement: the 1900s 
@@ -35,8 +35,22 @@ p("For much of the twentieth century, the
              predicted the changes in Korean 'hard' power, or economic status. 
              My data indicates patterns of foreign interest in traveling to 
              Korea from 2000 onwards."),
-mainPanel(plotOutput("plot1"),
-          ))),
+mainPanel(plotOutput("plot1")),
+          h4("1997"),
+          p("The IMF crisis hit Korean growth heavily in 1997, and outstanding
+          national loans were felt heavily as Korea entered the 21st century."),
+          h4("2007"),
+          p("Several important things happened in this year, demarcated on the 
+          graphs by the gray line. Korea firstly went from a net sending nation 
+          to a net receiving nation of immigrants."),
+          p("However, the Global Financial Crisis caused a severe decline of 
+            growth that would continue until 2009."),
+          h4("2010"),
+          p("Recovery entailed a sudden peak in growth in 2010. Government
+          directed market reforms reorganized chaebol conglomerates and 
+          liberalized the economy to help recovery. Going onwards, growth rate 
+          has stabilized around the 3% mark.")
+          )),
 
               tabPanel("Visa Permanency",
                        fluidPage(

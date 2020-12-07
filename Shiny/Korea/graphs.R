@@ -95,7 +95,7 @@ library(gganimate)
 plot <- ggplot(EARFEIwithGDP, aes(Year, Percentages, color = Visa)) +
   geom_line() +
   facet_wrap(~ Visa) +
-  geom_vline(xintercept = 2007, color = "darkgray") +
+  geom_vline(xintercept = c(2000, 2007, 2010), color = "gray") +
   geom_line(data = EARFEIwithGDP, aes(y = GDP_growth), color = "black", 
             lty = "dashed") +
   theme_bw() +
