@@ -32,20 +32,21 @@ join_pivot <- full_join(korea_GDP, Temp_Perm, by = "Year") %>%
   select(Year, Temp, Perm) %>%
   pivot_longer(cols = !Year, names_to = "Visa",
                values_to = "Percentages")
- Perm_v_Temp <- ggplot(join_pivot, aes(Year, Percentages, color = Visa)) +
-  geom_point() +
-    scale_color_manual(values = c("navy", "darkred")) +
-   theme_linedraw() +
-   labs(x = "Years", y = "Percentages",
-        title = "Percentage of Visas for Permanent v. Temporary Stays in Korea",
-        subtitle = "2000 to 2020")
+ # Perm_v_Temp <- ggplot(join_pivot, aes(Year, Percentages, color = Visa)) +
+ #  geom_point() +
+ #    scale_color_manual(values = c("navy", "darkred")) +
+ #   theme_linedraw() +
+ #   labs(x = "Years", y = "Percentages",
+ #        title = "Percentage of Visas for Permanent v. Temporary Stays in Korea",
+ #        subtitle = "2000 to 2020")
 
  
  
  
  
  
- 
+setwd("~/Desktop/Projects/Final-Project/Shiny/Korea")
+write.csv(withGDP, "data/withGDP.csv")
  
 # GRAPH 2
  # calculate GDP as a percentage of GDP in 2007, year when Korea became receiver nation
@@ -53,8 +54,12 @@ join_pivot <- full_join(korea_GDP, Temp_Perm, by = "Year") %>%
    rename(GDP_growth = 'GDP Growth') %>%
    mutate(GDP_growth = (GDP_growth/5.8)*100) %>%
    drop_na()
-
- Perm_v_Temp_graph <- ggplot(withGDP, aes(Year, Percentages, color = Visa)) +
+TempwithGDP <- withGDP %>%
+  filter(Visa == "Temp")
+PermwithGDP <- withGDP %>%
+  filter(Visa == "Perm")
+data <- withGDP
+ Perm_v_Temp_graph <- ggplot(data, aes(Year, Percentages, color = Visa)) +
    geom_line() +
    geom_line(data = withGDP, aes(y = GDP_growth), color = "black", lty = "dashed") +
    scale_color_manual(values = c("Temp" = "orange", "Perm" = "blue")) +

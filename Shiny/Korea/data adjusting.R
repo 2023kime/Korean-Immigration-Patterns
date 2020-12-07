@@ -173,3 +173,5 @@ EARFEIwithGDP <- full_join(join, kgrowth, by = "Year") %>%
 setwd("~/Desktop/Projects/Final-Project/Shiny/Korea")
 write.csv(EARFEIwithGDP, "data/EARFEIwithGDP.csv")
 
+
+

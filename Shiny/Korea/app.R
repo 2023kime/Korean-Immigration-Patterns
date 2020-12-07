@@ -12,6 +12,7 @@ library(gganimate)
 # UI is defined for the app. Title is labeled.
 
 EARFEIwithGDP <- read_csv("data/EARFEIwithGDP.csv")
+withGDP <- read_csv("data/withGDP.csv")
 
 ui <- navbarPage("Modern Patterns in Korean Immigration",
                  tabPanel("Visa Types",
@@ -70,7 +71,21 @@ h3("Important Dates"),
                                    standards. How did these broad 
                                    classifications of visas change as Korean
                                    GDP changed over time?"),
-                         plotOutput("plot2")),
+                                sidebarLayout(
+                                  sidebarPanel(
+                                    h4("Select Type of Visa")),
+                                  selectInput(
+                                    inputId = "visa",
+                                    label = "Choose Length of Visa Stay",
+                                    choices = c("Perm", "Temp"),
+                                    p("Perm/Temp regroups the same data used to 
+                                    identify the six broad categories of visas")
+                                  ),
+                                  mainPanel(
+                                    h4("Visas of entry to Korea 2000-2019")),
+                                  plotOutput("plot2", height = 500)
+                                  )
+                                )
                        )),
 
  # The next tab shows my model of the ways different numbers of visas granted 
@@ -130,27 +145,20 @@ output$plot1  <- renderImage({
        alt = 'Animated')
 }, deleteFile = FALSE)
   
-#output$plot2 <- 
+output$plot2 <- renderPlot({
+
+filtered_withGDP <- withGDP %>%
+    filter(Visa == input$visa)
+ggplot(filtered_withGDP, aes(Year, Percentages, color = Visa)) +
+    geom_line() +
+    geom_line(data = withGDP, aes(y = GDP_growth), color = "black", lty = "dashed") +
+    scale_color_manual(values = c("Temp" = "orange", "Perm" = "blue")) +
+    theme_linedraw() +
+    labs(x = "Years", y = "Percentages",
+         title = "Percentage of Visas for Permanent v. Temporary Stays in Korea",
+         subtitle = "2000 to 2020")
   
-  # ggplot(EARFEIwithGDP, aes(Year, Percentages, color = Visa)) +
-  #   geom_line() +
-  #   facet_wrap(~ Visa) +
-  #   geom_vline(xintercept = 2007, color = "darkgray") +
-  #   geom_line(data = EARFEIwithGDP, aes(y = GDP_growth), color = "black", 
-  #             lty = "dashed") +
-  #   theme_bw() +
-  #   labs(x = "Years", y = "Percentages",
-  #        title = "Reasons why People Visit Korea",
-  #        subtitle = "Types of Visas Granted from 2000 to 2020")
-  
-# withGDP <- full_join(join_pivot, kgrowth, by = "Year") %>%
-#   rename(GDP_growth = 'GDP Growth') %>%
-#   mutate(GDP_growth = (GDP_growth/5.8)*100) %>%
-#   drop_na()
-# join_pivot <- full_join(korea_GDP, Temp_Perm, by = "Year") %>%
-#   select(Year, Temp, Perm) %>%
-#   pivot_longer(cols = !Year, names_to = "Visa",
-#                values_to = "Percentages")
+})
 
 # ouput$secondlineplot <- ggplot(withGDP, aes(Year, Percentages, color = Visa)) +
 #   geom_line() +
