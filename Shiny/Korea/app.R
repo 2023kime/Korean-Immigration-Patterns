@@ -9,6 +9,7 @@ library(rstanarm)
 library(shinythemes)
 library(gganimate)
 library(gtsummary)
+library(gt) 
 
 # Important datasets for my two graphs and regression tables are imported as csv.
 
@@ -49,7 +50,7 @@ into Korea granted each year since 2000 are separated into six popular
 categories: Academic, Employment, Entertainment, Family, Investment, and 
 Religious-based reasons for traveling to Korea."),
 mainPanel(plotOutput("plot1"), height = 650),
-h3("Important Dates"),
+h4("Important Dates"),
           h4("1997"),
           p("The IMF crisis hit Korean growth heavily in 1997, and outstanding
           national loans were felt heavily as Korea entered the 21st century."),
@@ -62,8 +63,7 @@ h3("Important Dates"),
           h4("2010"),
           p("Recovery entailed a sudden peak in growth in 2010. Government
           directed market reforms reorganized chaebol conglomerates and 
-          liberalized the economy to help recovery. Going onwards, growth rate 
-          has stabilized around the 3% mark.")
+          liberalized the economy, and growth stabilized afterwards around 3%.")
           )),
 
 # Second tab is for showing length of stay comparison in visas.
@@ -203,7 +203,7 @@ output$fit <- render_gt({
 
 output$fit2 <- render_gt({
   f2 <- lm(formula = Perm_sum ~ GDP *Year,
-             data = joined)
+             data = temp_perm)
   tbl_regression(f2, intercept = TRUE) %>%
     as_gt() %>%
     tab_header(title = md("**Regression of Permanent Visas**"),
