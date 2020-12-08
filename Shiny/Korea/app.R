@@ -10,7 +10,7 @@ library(shinythemes)
 library(gganimate)
 library(gtsummary)
 
-# Two important datasets for my two final graphs are imported as csv.
+# Important datasets for my two graphs and regression tables are imported as csv.
 
 EARFEIwithGDP <- read_csv("data/EARFEIwithGDP.csv")
 withGDP <- read_csv("data/withGDP.csv")
