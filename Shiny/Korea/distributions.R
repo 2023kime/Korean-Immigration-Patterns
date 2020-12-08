@@ -21,14 +21,14 @@ kgrowth$Investment <- Investment$sum
 kgrowth$Sum <- totalsum
 finaldata <- kgrowth
 
-stan_glm(formula = Sum ~ Year + `GDP Growth` + Entertainment,
-         data = kgrowth,
-         refresh = 0) %>%
-  print(digits = 10, detail = FALSE)
-
-model <- lm(formula = `GDP Growth` ~ Year + log(Sum),
-         data = kgrowth)
-summary(model)
+# stan_glm(formula = Sum ~ Year + `GDP Growth` + Entertainment,
+#          data = kgrowth,
+#          refresh = 0) %>%
+#   print(digits = 10, detail = FALSE)
+# 
+# model <- lm(formula = `GDP Growth` ~ Year + log(Sum),
+#          data = kgrowth)
+# summary(model)
 
 
 
@@ -37,21 +37,25 @@ summary(model)
 
 # Looking at Temporary and Permanent Visas
 # This has Job Seeking by M/F/T and GDP values from 2000 to 2020
-joined <- full_join(temp_v_perm, korea_GDP, by = "Year") %>%
+temp_perm <- full_join(temp_v_perm, korea_GDP, by = "Year") %>%
   rename(GDP = value) %>%
   select(-Indicator)
+setwd("~/Desktop/Projects/Final-Project/Shiny/Korea")
+write.csv(temp_perm, "data/temp_perm.csv")
 
-fit <- stan_glm(formula = Temp_sum ~ GDP - 1,
-         data = joined,
-         refresh = 0) %>%
-  print(digits = 4, deatil = FALSE)
-plot(fit, "hist", pars = "GDP")
+fit <- lm(formula = Temp_sum ~ GDP *Year,
+         data = joined)
+tbl_regression(fit, intercept = TRUE) %>%
+  as_gt() %>%
+  tab_header(title = md("**Regression of Temporary Visas**"),
+             subtitle = "The Effect of GDP on Temporary Visas Sought")
 
-fit2 <- stan_glm(formula = GDP ~ Temp_sum + Perm_sum -1,
-                 data = joined,
-                 refresh = 0) %>%
-  print(digits = 4, deatil = FALSE)
-plot(fit2, "hist", pars = c("Temp_sum", "Perm_sum"), binwidth = .05)
+fit2 <- lm(formula = Perm_sum ~ GDP *Year,
+                 data = joined)
+tbl_regression(fit2, intercept = TRUE) %>%
+  as_gt() %>%
+  tab_header(title = md("**Regression of Permanent Visas**"),
+             subtitle = "The Effect of GDP on Permanent Visas Sought")
 
 fit3 <- stan_glm(formula = `GDP Growth` ~ Entertainment + Employment + Academic + 
                    Religion + Family + Investment - 1,
@@ -66,6 +70,9 @@ m3 <- lm(`GDP Growth` ~ Entertainment + Employment + Academic +
          data = finaldata)
 summary(m3) 
 # make this model into table
+
+m4 <- lm(Entertainment ~ 'GDP Growth',
+         data = finaldata)
 
 
 m1 <- lm(Perm_sum ~ GDP + Year,
